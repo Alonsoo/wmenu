@@ -580,25 +580,35 @@ void menu_keypress(struct menu *menu, enum wl_keyboard_key_state key_state,
 		break;
 	case XKB_KEY_Left:
 	case XKB_KEY_KP_Left:
+		if (menu->cursor > 0) {
+			menu->cursor = nextrune(menu, -1);
+			render_menu(menu);
+		}
+		break;
 	case XKB_KEY_Up:
 	case XKB_KEY_KP_Up:
 		if (menu->sel && menu->sel->prev_match) {
 			menu->sel = menu->sel->prev_match;
 			render_menu(menu);
-		} else if (menu->cursor > 0) {
-			menu->cursor = nextrune(menu, -1);
+		} else if (menu->sel && menu->sel == menu->matches) {
+			menu->sel = menu->matches_end;
 			render_menu(menu);
 		}
 		break;
 	case XKB_KEY_Right:
 	case XKB_KEY_KP_Right:
-	case XKB_KEY_Down:
-	case XKB_KEY_KP_Down:
 		if (menu->cursor < len) {
 			menu->cursor = nextrune(menu, +1);
 			render_menu(menu);
-		} else if (menu->sel && menu->sel->next_match) {
+		}
+		break;
+	case XKB_KEY_Down:
+	case XKB_KEY_KP_Down:
+		if (menu->sel && menu->sel->next_match) {
 			menu->sel = menu->sel->next_match;
+			render_menu(menu);
+		} else if (menu->sel && menu->sel == menu->matches_end) {
+			menu->sel = menu->matches;
 			render_menu(menu);
 		}
 		break;
