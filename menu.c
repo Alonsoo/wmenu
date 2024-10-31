@@ -33,6 +33,8 @@ struct menu *menu_create(menu_callback callback) {
 	menu->selectionbg = 0x005577ff;
 	menu->selectionfg = 0xeeeeeeff;
 	menu->callback = callback;
+	menu->test_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1, 1);
+	menu->test_cairo = cairo_create(menu->test_surface);
 	return menu;
 }
 
@@ -63,6 +65,8 @@ static void free_items(struct menu *menu) {
 void menu_destroy(struct menu *menu) {
 	free_pages(menu);
 	free_items(menu);
+	cairo_destroy(menu->test_cairo);
+	cairo_surface_destroy(menu->test_surface);
 	free(menu);
 }
 
@@ -368,7 +372,6 @@ static void match_items(struct menu *menu) {
 
 // Render menu items.
 void menu_render_items(struct menu *menu) {
-	render_menu(menu);
 	calc_widths(menu);
 	match_items(menu);
 	render_menu(menu);

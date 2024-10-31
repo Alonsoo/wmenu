@@ -1,6 +1,7 @@
 #ifndef WMENU_MENU_H
 #define WMENU_MENU_H
 
+#include <cairo/cairo.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include <xkbcommon/xkbcommon.h>
@@ -51,6 +52,10 @@ struct menu {
 	uint32_t selectionbg, selectionfg;
 
 	struct wl_context *context;
+
+	// 1x1 surface used estimate text sizes with pango
+	cairo_surface_t *test_surface;
+	cairo_t *test_cairo;
 
 	int width;
 	int height;

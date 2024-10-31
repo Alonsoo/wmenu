@@ -13,8 +13,13 @@
 // Calculate text widths.
 void calc_widths(struct menu *menu) {
 	struct wl_context *context = menu->context;
-	struct pool_buffer *current = context_get_current_buffer(context);
-	cairo_t *cairo = current->cairo;
+	int scale = context_get_scale(context);
+	cairo_surface_set_device_scale(menu->test_surface, scale, scale);
+	cairo_set_antialias(menu->test_cairo, CAIRO_ANTIALIAS_BEST);
+	cairo_font_options_t *fo = cairo_font_options_create();
+	cairo_set_font_options(menu->test_cairo, fo);
+	cairo_font_options_destroy(fo);
+	cairo_t *cairo = menu->test_cairo;
 
 	// Calculate prompt width
 	if (menu->prompt) {
