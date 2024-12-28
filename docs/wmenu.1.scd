@@ -6,7 +6,7 @@ wmenu - dynamic menu for Wayland
 
 # SYNOPSIS
 
-*wmenu* [-biPv] \
+*wmenu* [-1biPv] \
   [-f _font_] \
   [-l _lines_] \
   [-o _output_] \
@@ -28,6 +28,9 @@ to those matching the tokens in the input.
 $PATH and runs the result.
 
 # OPTIONS
+
+*-1*
+	allow only one instance.
 
 *-b*
 	wmenu appears at the bottom of the screen.

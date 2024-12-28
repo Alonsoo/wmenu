@@ -29,6 +29,8 @@ struct page {
 
 // Menu state.
 struct menu {
+	// Allow only one instance
+	bool single_instance;
 	// Whether the menu appears at the bottom of the screen
 	bool bottom;
 	// The function used to match menu items
