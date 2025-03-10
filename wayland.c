@@ -220,7 +220,11 @@ static void layer_surface_configure(void *data,
 		struct zwlr_layer_surface_v1 *surface,
 		uint32_t serial, uint32_t width, uint32_t height) {
 	struct wl_context *context = data;
-	context->menu->width = width;
+	if (context->menu->customwidth > 0) {
+		context->menu->width = context->menu->customwidth;
+	} else {
+		context->menu->width = width;
+	}
 	context->menu->height = height;
 	zwlr_layer_surface_v1_ack_configure(surface, serial);
 }

@@ -106,7 +106,7 @@ static void render_input(struct menu *menu, cairo_t *cairo) {
 // Renders a cursor for the input field.
 static void render_cursor(struct menu *menu, cairo_t *cairo) {
 	const int cursor_width = 2;
-	const int cursor_margin = 2;
+	const int cursor_margin = menu->line_height / 5;
 	int cursor_pos = menu->promptw + menu->padding
 		+ text_width(cairo, menu->font, menu->input)
 		- text_width(cairo, menu->font, &menu->input[menu->cursor])
@@ -144,11 +144,11 @@ static void render_horizontal_page(struct menu *menu, cairo_t *cairo, struct pag
 
 	// Draw left and right scroll indicators if necessary
 	if (page->prev) {
-		cairo_move_to(cairo, menu->promptw + menu->inputw + menu->padding, 0);
+		cairo_move_to(cairo, menu->promptw + menu->inputw + menu->padding, menu->customheight / 2);
 		pango_printf(cairo, menu->font, 1, "<");
 	}
 	if (page->next) {
-		cairo_move_to(cairo, menu->width - menu->right_arrow + menu->padding, 0);
+		cairo_move_to(cairo, menu->width - menu->right_arrow + menu->padding, menu->customheight / 2);
 		pango_printf(cairo, menu->font, 1, ">");
 	}
 }

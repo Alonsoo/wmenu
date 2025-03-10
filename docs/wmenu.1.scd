@@ -9,6 +9,8 @@ wmenu - dynamic menu for Wayland
 *wmenu* [-biPv] \
   [-f _font_] \
   [-l _lines_] \
+  [-g _height_] \
+  [-w _width_] \
   [-o _output_] \
   [-p _prompt_] \
   [-N _color_] [-n _color_] \
@@ -24,8 +26,8 @@ items from stdin. When the user selects an item and presses Return, their choice
 is printed to stdout and wmenu terminates. Entering text will narrow the items
 to those matching the tokens in the input.
 
-*wmenu-run* is a special invocation of wmenu which lists programs in the user's
-$PATH and runs the result.
+*wmenu-run* is a special script which lists programs in the user's
+$PATH and runs the result with the main *wmenu* executable.
 
 # OPTIONS
 
@@ -48,6 +50,12 @@ $PATH and runs the result.
 
 *-l* _lines_
 	wmenu lists items vertically, with the given number of lines.
+
+*-g* _height_
+	this value will be added to the height of each line.
+
+*-w* _width_
+	the width of the window will be constrained to this value.
 
 *-o* _output_
 	wmenu is displayed on the output with the given name.

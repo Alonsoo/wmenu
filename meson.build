@@ -21,12 +21,12 @@ add_project_arguments(cc.get_supported_arguments([
 	'-Wvla',
 ]), language : 'c')
 
-cairo           = dependency('cairo')
-pango           = dependency('pango')
-pangocairo      = dependency('pangocairo')
-wayland_client  = dependency('wayland-client')
-wayland_protos  = dependency('wayland-protocols')
-xkbcommon       = dependency('xkbcommon')
+cairo = dependency('cairo')
+pango = dependency('pango')
+pangocairo = dependency('pangocairo')
+wayland_client = dependency('wayland-client')
+wayland_protos = dependency('wayland-protocols')
+xkbcommon = dependency('xkbcommon')
 
 rt = cc.find_library('rt')
 
@@ -56,25 +56,4 @@ executable(
 	install: true,
 )
 
-executable(
-	'wmenu-run',
-	files(
-		'menu.c',
-		'pango.c',
-		'pool-buffer.c',
-		'render.c',
-		'wayland.c',
-		'wmenu-run.c',
-	),
-	dependencies: [
-		cairo,
-		client_protos,
-		pango,
-		pangocairo,
-		rt,
-		wayland_client,
-		wayland_protos,
-		xkbcommon,
-	],
-	install: true,
-)
+meson.add_install_script('install-wmenu-run.sh')

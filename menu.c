@@ -27,6 +27,7 @@ struct menu *menu_create(menu_callback callback) {
 	struct menu *menu = calloc(1, sizeof(struct menu));
 	menu->strncmp = strncmp;
 	menu->font = "monospace 10";
+	menu->line_height = get_font_height(menu->font) + 2;
 	menu->normalbg = 0x222222ff;
 	menu->normalfg = 0xbbbbbbff;
 	menu->promptbg = 0x005577ff;
@@ -85,11 +86,14 @@ static bool parse_color(const char *color, uint32_t *result) {
 // Parse menu options from command line arguments.
 void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 	const char *usage =
-		"Usage: wmenu [-biPv] [-f font] [-l lines] [-o output] [-p prompt]\n"
-		"\t[-N color] [-n color] [-M color] [-m color] [-S color] [-s color]\n";
+		"Usage: wmenu [-biPv] [-f font] [-l lines] [-g height] [-w width] [-o output]\n"
+		"\t[-p prompt] [-N color] [-n color] [-M color] [-m color] [-S color] [-s color]\n";
 
+	menu->customwidth = 0;
+	menu->customheight = 0;
+	
 	int opt;
-	while ((opt = getopt(argc, argv, "bhiPvf:l:o:p:N:n:M:m:S:s:")) != -1) {
+	while ((opt = getopt(argc, argv, "bhiPvf:l:g:w:o:p:N:n:M:m:S:s:")) != -1) {
 		switch (opt) {
 		case 'b':
 			menu->bottom = true;
@@ -108,6 +112,13 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 			break;
 		case 'l':
 			menu->lines = atoi(optarg);
+			break;
+		case 'g':
+			menu->customheight = atoi(optarg);
+			menu->line_height = get_font_height(menu->font) + menu->customheight;
+			break;
+		case 'w':
+			menu->customwidth = atoi(optarg);
 			break;
 		case 'o':
 			menu->output_name = optarg;
@@ -156,13 +167,11 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	int height = get_font_height(menu->font);
-	menu->line_height = height + 2;
 	menu->height = menu->line_height;
 	if (menu->lines > 0) {
 		menu->height += menu->height * menu->lines;
 	}
-	menu->padding = height / 2;
+	menu->padding = get_font_height(menu->font) / 2;
 }
 
 // Add an item to the menu.
