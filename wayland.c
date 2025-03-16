@@ -454,9 +454,14 @@ int menu_run(struct menu *menu) {
 		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
 	}
 
+	if (menu->exclusive) {
+		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, 0);
+	} else {
+		zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, -1);
+	}
+
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
 	zwlr_layer_surface_v1_set_size(layer_surface, 0, menu->height);
-	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, -1);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, true);
 	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, context);
 
