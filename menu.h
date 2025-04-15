@@ -37,6 +37,8 @@ struct menu {
 	bool passwd;
 	// The font used to display the menu
 	char *font;
+	// Alternative path
+	const char *path;
 	// The number of lines to list items vertically
 	int lines;
 	// The name of the output to display on

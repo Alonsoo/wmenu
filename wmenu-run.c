@@ -10,7 +10,7 @@
 #include "xdg-activation-v1-client-protocol.h"
 
 static void read_items(struct menu *menu) {
-	char *path = strdup(getenv("PATH"));
+	char *path = menu->path ? strdup(menu->path) : strdup(getenv("PATH"));
 	for (char *p = strtok(path, ":"); p != NULL; p = strtok(NULL, ":")) {
 		DIR *dir = opendir(p);
 		if (dir == NULL) {
