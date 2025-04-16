@@ -107,12 +107,13 @@ static void render_input(struct menu *menu, cairo_t *cairo) {
 static void render_cursor(struct menu *menu, cairo_t *cairo) {
 	const int cursor_width = 2;
 	const int cursor_margin = 2;
-	int cursor_pos = menu->promptw + menu->padding
+	int cursor_x_pos = menu->promptw + menu->padding
 		+ text_width(cairo, menu->font, menu->input)
 		- text_width(cairo, menu->font, &menu->input[menu->cursor])
 		- cursor_width / 2;
-	cairo_rectangle(cairo, cursor_pos, cursor_margin, cursor_width,
-			menu->line_height - 2 * cursor_margin);
+	int cursor_y_pos = (menu->line_height - menu->font_height) / 2 + cursor_margin;
+	cairo_rectangle(cairo, cursor_x_pos, cursor_y_pos, cursor_width,
+			menu->font_height - cursor_margin);
 	cairo_fill(cairo);
 }
 

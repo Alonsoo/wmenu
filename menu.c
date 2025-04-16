@@ -89,7 +89,8 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 		"\t[-N color] [-n color] [-M color] [-m color] [-S color] [-s color]\n";
 
 	int opt;
-	while ((opt = getopt(argc, argv, "bhiPvf:l:o:p:N:n:M:m:S:s:")) != -1) {
+	int line_height = 0;
+	while ((opt = getopt(argc, argv, "bhiPvH:f:l:o:p:N:n:M:m:S:s:")) != -1) {
 		switch (opt) {
 		case 'b':
 			menu->bottom = true;
@@ -103,6 +104,9 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 		case 'v':
 			puts("wmenu " VERSION);
 			exit(EXIT_SUCCESS);
+		case 'H':
+			line_height = atoi(optarg);
+			break;
 		case 'f':
 			menu->font = optarg;
 			break;
@@ -156,13 +160,16 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 		exit(EXIT_FAILURE);
 	}
 
-	int height = get_font_height(menu->font);
-	menu->line_height = height + 2;
+	menu->font_height = get_font_height(menu->font);
+	menu->line_height = menu->font_height + 2;
+	if(line_height > menu->line_height) {
+		menu->line_height = line_height;
+	}
 	menu->height = menu->line_height;
 	if (menu->lines > 0) {
 		menu->height += menu->height * menu->lines;
 	}
-	menu->padding = height / 2;
+	menu->padding = menu->font_height / 2;
 }
 
 // Add an item to the menu.

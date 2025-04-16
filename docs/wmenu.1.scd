@@ -7,6 +7,7 @@ wmenu - dynamic menu for Wayland
 # SYNOPSIS
 
 *wmenu* [-biPv] \
+  [-H _height_] \
   [-f _font_] \
   [-l _lines_] \
   [-o _output_] \
@@ -41,6 +42,10 @@ $PATH and runs the result.
 
 *-v*
 	prints version information to stdout, then exits.
+
+*-H* _height_
+	defines the height of a line (usually in pixels). For more information,
+	see https://docs.gtk.org/Pango/const.SCALE.html
 
 *-f* _font_
 	defines the font used. For more information, see
