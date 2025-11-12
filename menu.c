@@ -181,6 +181,11 @@ void menu_add_item(struct menu *menu, char *text) {
 	new->text = text;
 
 	menu->item_count++;
+
+	if ((size_t)menu->lines > (menu->item_count - 1)){
+		menu->height = menu->line_height;
+		menu->height += menu->height * menu->item_count;
+	}
 }
 
 static int compare_items(const void *a, const void *b) {
