@@ -22,6 +22,8 @@
 #include "xdg-activation-v1-client-protocol.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 
+struct screen_info screen_info;
+
 // A Wayland output.
 struct output {
 	struct wl_context *context;
@@ -240,6 +242,11 @@ static void output_scale(void *data, struct wl_output *wl_output, int32_t factor
 	output->scale = factor;
 }
 
+static void
+output_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags, int32_t width, int32_t height, int32_t refresh) {
+	screen_info.width = width;
+}
+
 static void output_name(void *data, struct wl_output *wl_output, const char *name) {
 	struct output *output = data;
 	output->name = name;
@@ -252,7 +259,7 @@ static void output_name(void *data, struct wl_output *wl_output, const char *nam
 
 static const struct wl_output_listener output_listener = {
 	.geometry = noop,
-	.mode = noop,
+	.mode = output_handle_mode,
 	.done = noop,
 	.scale = output_scale,
 	.name = output_name,
@@ -446,16 +453,22 @@ int menu_run(struct menu *menu) {
 	assert(layer_surface != NULL);
 	context->layer_surface = layer_surface;
 
-	uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
-		ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
-	if (menu->bottom) {
-		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
+	uint32_t anchor;
+	int wd = 0;
+	calc_widths(menu);
+
+	if (menu->centered) {
+		anchor = 0;
+		int min_width = 500;
+		wd = MIN(MAX(menu->inputw + menu->promptw, min_width) + 15, screen_info.width);
 	} else {
-		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
+		anchor = (menu->bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) |
+			ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+			ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
 	}
 
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
-	zwlr_layer_surface_v1_set_size(layer_surface, 0, menu->height);
+	zwlr_layer_surface_v1_set_size(layer_surface, wd, menu->height);
 	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, -1);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, true);
 	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, context);

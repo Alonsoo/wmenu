@@ -39,6 +39,9 @@ $PATH and runs the result.
 	wmenu will not directly display the keyboard input, but instead replace it
 	with asterisks.
 
+*-c
+	wmenu appears centered on the screen.
+
 *-v*
 	prints version information to stdout, then exits.
 

@@ -27,10 +27,17 @@ struct page {
 	struct page *next;  // next page
 };
 
+// very ugly, has to be changed
+struct screen_info {
+	int width;
+};
+
 // Menu state.
 struct menu {
 	// Whether the menu appears at the bottom of the screen
 	bool bottom;
+	// Whether the menu is centered on screen
+	bool centered;
 	// The function used to match menu items
 	int (*strncmp)(const char *, const char *, size_t);
 	// Whether the input is a password
