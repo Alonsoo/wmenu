@@ -36,8 +36,13 @@ struct screen_info {
 struct menu {
 	// Whether the menu appears at the bottom of the screen
 	bool bottom;
+<<<<<<< HEAD
 	// Whether the menu is centered on screen
 	bool centered;
+=======
+	// Adds a margin between wmenu and the screen edge
+	int margin;
+>>>>>>> Patch that adds a gap between wmenu and screen edge
 	// The function used to match menu items
 	int (*strncmp)(const char *, const char *, size_t);
 	// Whether the input is a password

@@ -1,0 +1,74 @@
+From 088a53b797675db1bad60d09bcaaf66316cd9b6b Mon Sep 17 00:00:00 2001
+From: Leo Martin <contact@leomartin.ch>
+Date: Thu, 20 Nov 2025 01:15:34 +0100
+Subject: [PATCH] Patch that adds a gap between wmenu and screen edge
+
+---
+ menu.c    | 5 ++++-
+ menu.h    | 2 ++
+ wayland.c | 4 ++++
+ 3 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/menu.c b/menu.c
+index 360ee69..bddf5b1 100644
+--- a/menu.c
++++ b/menu.c
+@@ -89,7 +89,7 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
+ 		"\t[-N color] [-n color] [-M color] [-m color] [-S color] [-s color]\n";
+ 
+ 	int opt;
+-	while ((opt = getopt(argc, argv, "bhiPvf:l:o:p:N:n:M:m:S:s:")) != -1) {
++	while ((opt = getopt(argc, argv, "bhiPvf:l:o:p:N:n:M:m:S:s:G:")) != -1) {
+ 		switch (opt) {
+ 		case 'b':
+ 			menu->bottom = true;
+@@ -109,6 +109,9 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
+ 		case 'l':
+ 			menu->lines = atoi(optarg);
+ 			break;
++		case 'G':
++			menu->margin = atoi(optarg);
++			break;
+ 		case 'o':
+ 			menu->output_name = optarg;
+ 			break;
+diff --git a/menu.h b/menu.h
+index 491b014..5d77fdd 100644
+--- a/menu.h
++++ b/menu.h
+@@ -31,6 +31,8 @@ struct page {
+ struct menu {
+ 	// Whether the menu appears at the bottom of the screen
+ 	bool bottom;
++	// Adds a margin between wmenu and the screen edge
++	int margin;
+ 	// The function used to match menu items
+ 	int (*strncmp)(const char *, const char *, size_t);
+ 	// Whether the input is a password
+diff --git a/wayland.c b/wayland.c
+index 823ced1..ec6a7b9 100644
+--- a/wayland.c
++++ b/wayland.c
+@@ -446,15 +446,19 @@ int menu_run(struct menu *menu) {
+ 	assert(layer_surface != NULL);
+ 	context->layer_surface = layer_surface;
+ 
++	int margin_top, margin_bottom = 0;
+ 	uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+ 		ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+ 	if (menu->bottom) {
+ 		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
++		margin_bottom = menu->margin;
+ 	} else {
+ 		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
++		margin_top = menu->margin;
+ 	}
+ 
+ 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
++	zwlr_layer_surface_v1_set_margin(layer_surface, margin_top, 0, margin_bottom, 0);
+ 	zwlr_layer_surface_v1_set_size(layer_surface, 0, menu->height);
+ 	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, -1);
+ 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, true);
+-- 
+2.51.2
+

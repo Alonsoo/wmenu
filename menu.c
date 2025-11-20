@@ -94,7 +94,7 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 	};
 
 	int opt;
-	while ((opt = getopt_long(argc, argv, "bhiPcvf:l:o:p:N:n:M:m:S:s:", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "bhiPcvf:l:o:p:N:n:M:m:S:s:G:", long_options, NULL)) != -1) {
 		switch (opt) {
 		case 1000: // --bw
 			menu->border_width = atoi(optarg);
@@ -119,6 +119,9 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 			break;
 		case 'l':
 			menu->lines = atoi(optarg);
+			break;
+		case 'G':
+			menu->margin = atoi(optarg);
 			break;
 		case 'o':
 			menu->output_name = optarg;

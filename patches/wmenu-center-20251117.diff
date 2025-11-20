@@ -1,0 +1,137 @@
+From 21e05ddf8a5e03ae8e8aa34037e3ad8125d23f88 Mon Sep 17 00:00:00 2001
+From: Leo Martin <contact@leomartin.ch>
+Date: Mon, 17 Nov 2025 18:26:05 +0100
+Subject: [PATCH] Patch to center wmenu in the middle of the screen
+
+---
+ docs/wmenu.1.scd |  3 +++
+ menu.c           |  5 ++++-
+ menu.h           |  7 +++++++
+ wayland.c        | 27 ++++++++++++++++++++-------
+ 4 files changed, 34 insertions(+), 8 deletions(-)
+
+diff --git a/docs/wmenu.1.scd b/docs/wmenu.1.scd
+index 4519e8b..d8b456b 100644
+--- a/docs/wmenu.1.scd
++++ b/docs/wmenu.1.scd
+@@ -39,6 +39,9 @@ $PATH and runs the result.
+ 	wmenu will not directly display the keyboard input, but instead replace it
+ 	with asterisks.
+ 
++*-c
++	wmenu appears centered on the screen.
++
+ *-v*
+ 	prints version information to stdout, then exits.
+ 
+diff --git a/menu.c b/menu.c
+index 207d71c..7f3eb8b 100644
+--- a/menu.c
++++ b/menu.c
+@@ -89,7 +89,7 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
+ 		"\t[-N color] [-n color] [-M color] [-m color] [-S color] [-s color]\n";
+ 
+ 	int opt;
+-	while ((opt = getopt(argc, argv, "bhiPvf:l:o:p:N:n:M:m:S:s:")) != -1) {
++	while ((opt = getopt(argc, argv, "bhiPcvf:l:o:p:N:n:M:m:S:s:")) != -1) {
+ 		switch (opt) {
+ 		case 'b':
+ 			menu->bottom = true;
+@@ -100,6 +100,9 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
+ 		case 'P':
+ 			menu->passwd = true;
+ 			break;
++		case 'c':
++			menu->centered = true;
++			break;
+ 		case 'v':
+ 			puts("wmenu " VERSION);
+ 			exit(EXIT_SUCCESS);
+diff --git a/menu.h b/menu.h
+index fdd9ad2..b0be442 100644
+--- a/menu.h
++++ b/menu.h
+@@ -27,10 +27,17 @@ struct page {
+ 	struct page *next;  // next page
+ };
+ 
++// very ugly, has to be changed
++struct screen_info {
++	int width;
++};
++
+ // Menu state.
+ struct menu {
+ 	// Whether the menu appears at the bottom of the screen
+ 	bool bottom;
++	// Whether the menu is centered on screen
++	bool centered;
+ 	// The function used to match menu items
+ 	int (*strncmp)(const char *, const char *, size_t);
+ 	// Whether the input is a password
+diff --git a/wayland.c b/wayland.c
+index 823ced1..3a52356 100644
+--- a/wayland.c
++++ b/wayland.c
+@@ -22,6 +22,8 @@
+ #include "xdg-activation-v1-client-protocol.h"
+ #include "wlr-layer-shell-unstable-v1-client-protocol.h"
+ 
++struct screen_info screen_info;
++
+ // A Wayland output.
+ struct output {
+ 	struct wl_context *context;
+@@ -240,6 +242,11 @@ static void output_scale(void *data, struct wl_output *wl_output, int32_t factor
+ 	output->scale = factor;
+ }
+ 
++static void
++output_handle_mode(void *data, struct wl_output *wl_output, uint32_t flags, int32_t width, int32_t height, int32_t refresh) {
++	screen_info.width = width;
++}
++
+ static void output_name(void *data, struct wl_output *wl_output, const char *name) {
+ 	struct output *output = data;
+ 	output->name = name;
+@@ -252,7 +259,7 @@ static void output_name(void *data, struct wl_output *wl_output, const char *nam
+ 
+ static const struct wl_output_listener output_listener = {
+ 	.geometry = noop,
+-	.mode = noop,
++	.mode = output_handle_mode,
+ 	.done = noop,
+ 	.scale = output_scale,
+ 	.name = output_name,
+@@ -446,16 +453,22 @@ int menu_run(struct menu *menu) {
+ 	assert(layer_surface != NULL);
+ 	context->layer_surface = layer_surface;
+ 
+-	uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+-		ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+-	if (menu->bottom) {
+-		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
++	uint32_t anchor;
++	int wd = 0;
++	calc_widths(menu);
++
++	if (menu->centered) {
++		anchor = 0;
++		int min_width = 500;
++		wd = MIN(MAX(menu->inputw + menu->promptw, min_width) + 15, screen_info.width);
+ 	} else {
+-		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP;
++		anchor = (menu->bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) |
++			ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
++			ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+ 	}
+ 
+ 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
+-	zwlr_layer_surface_v1_set_size(layer_surface, 0, menu->height);
++	zwlr_layer_surface_v1_set_size(layer_surface, wd, menu->height);
+ 	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, -1);
+ 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, true);
+ 	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, context);
+-- 
+2.51.2
+
