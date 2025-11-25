@@ -66,6 +66,7 @@ struct menu {
 	int width;
 	int height;
 	int line_height;
+	int border_width;
 	int padding;
 	int inputw;
 	int promptw;

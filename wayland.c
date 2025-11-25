@@ -460,7 +460,7 @@ int menu_run(struct menu *menu) {
 	if (menu->centered) {
 		anchor = 0;
 		int min_width = 500;
-		wd = MIN(MAX(menu->inputw + menu->promptw, min_width) + 15, screen_info.width);
+		wd = MIN(MAX(menu->inputw + menu->promptw, min_width) + 15 + (2 * menu->border_width), screen_info.width);
 	} else {
 		anchor = (menu->bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) |
 			ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |

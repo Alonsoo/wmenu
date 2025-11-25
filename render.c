@@ -79,7 +79,7 @@ static void render_prompt(struct menu *menu, cairo_t *cairo) {
 	if (!menu->prompt) {
 		return;
 	}
-	render_text(menu, cairo, menu->prompt, 0, 0, 0,
+	render_text(menu, cairo, menu->prompt, menu->border_width, menu->border_width, 0,
 		menu->promptbg, menu->promptfg, menu->padding, menu->padding/2);
 }
 
@@ -96,7 +96,8 @@ static void render_input(struct menu *menu, cairo_t *cairo) {
 	}
 
 	render_text(menu, cairo, menu->passwd ? censort : menu->input,
-		menu->promptw, 0, 0, 0, menu->normalfg, menu->padding, menu->padding);
+		menu->promptw + menu->border_width, menu->border_width, menu->border_width, 0,
+		menu->normalfg, menu->padding, menu->padding);
 
 	if (censort) {
 		free(censort);
@@ -107,11 +108,11 @@ static void render_input(struct menu *menu, cairo_t *cairo) {
 static void render_cursor(struct menu *menu, cairo_t *cairo) {
 	const int cursor_width = 2;
 	const int cursor_margin = 2;
-	int cursor_pos = menu->promptw + menu->padding
+	int cursor_pos = menu->promptw + menu->padding + menu->border_width
 		+ text_width(cairo, menu->font, menu->input)
 		- text_width(cairo, menu->font, &menu->input[menu->cursor])
 		- cursor_width / 2;
-	cairo_rectangle(cairo, cursor_pos, cursor_margin, cursor_width,
+	cairo_rectangle(cairo, cursor_pos, cursor_margin + menu->border_width, cursor_width,
 			menu->line_height - 2 * cursor_margin);
 	cairo_fill(cairo);
 }
@@ -121,7 +122,7 @@ static int render_horizontal_item(struct menu *menu, cairo_t *cairo, struct item
 	uint32_t bg_color = menu->sel == item ? menu->selectionbg : menu->normalbg;
 	uint32_t fg_color = menu->sel == item ? menu->selectionfg : menu->normalfg;
 
-	return render_text(menu, cairo, item->text, x, 0, 0,
+	return render_text(menu, cairo, item->text, x + menu->border_width, menu->border_width, 0,
 		bg_color, fg_color, menu->padding, menu->padding);
 }
 
@@ -130,8 +131,8 @@ static int render_vertical_item(struct menu *menu, cairo_t *cairo, struct item *
 	uint32_t bg_color = menu->sel == item ? menu->selectionbg : menu->normalbg;
 	uint32_t fg_color = menu->sel == item ? menu->selectionfg : menu->normalfg;
 
-	render_text(menu, cairo, item->text, x, y, menu->width - x,
-		bg_color, fg_color, menu->padding, 0);
+	render_text(menu, cairo, item->text, x + menu->border_width, y + menu->border_width,
+		menu->width - x - (2 * menu->border_width), bg_color, fg_color, menu->padding, 0);
 	return menu->line_height;
 }
 
@@ -144,11 +145,11 @@ static void render_horizontal_page(struct menu *menu, cairo_t *cairo, struct pag
 
 	// Draw left and right scroll indicators if necessary
 	if (page->prev) {
-		cairo_move_to(cairo, menu->promptw + menu->inputw + menu->padding, 0);
+		cairo_move_to(cairo, menu->promptw + menu->inputw + menu->padding + menu->border_width, menu->border_width);
 		pango_printf(cairo, menu->font, 1, "<");
 	}
 	if (page->next) {
-		cairo_move_to(cairo, menu->width - menu->right_arrow + menu->padding, 0);
+		cairo_move_to(cairo, menu->width - menu->right_arrow + menu->padding - menu->border_width, menu->border_width);
 		pango_printf(cairo, menu->font, 1, ">");
 	}
 }
@@ -168,6 +169,14 @@ static void render_to_cairo(struct menu *menu, cairo_t *cairo) {
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 	cairo_set_source_u32(cairo, menu->normalbg);
 	cairo_paint(cairo);
+
+	// Render border
+	if (menu->border_width) {
+		cairo_set_line_width (cairo, menu->border_width);
+		cairo_set_source_u32(cairo, menu->selectionbg);
+		cairo_rectangle (cairo, menu->border_width / 2, menu->border_width / 2, menu->width - menu->border_width, menu->height - menu->border_width);
+		cairo_stroke (cairo);
+	}
 
 	// Render prompt and input
 	render_prompt(menu, cairo);

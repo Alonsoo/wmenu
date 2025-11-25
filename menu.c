@@ -9,7 +9,7 @@
 #include <string.h>
 #include <strings.h>
 #include <time.h>
-#include <unistd.h>
+#include <getopt.h>
 #include <sys/mman.h>
 #include <sys/timerfd.h>
 #include <wayland-client.h>
@@ -88,9 +88,17 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 		"Usage: wmenu [-biPv] [-f font] [-l lines] [-o output] [-p prompt]\n"
 		"\t[-N color] [-n color] [-M color] [-m color] [-S color] [-s color]\n";
 
+	static struct option long_options[] = {
+		{"bw", required_argument, NULL, 1000},
+		{NULL, 0, NULL, 0}
+	};
+
 	int opt;
-	while ((opt = getopt(argc, argv, "bhiPcvf:l:o:p:N:n:M:m:S:s:")) != -1) {
+	while ((opt = getopt_long(argc, argv, "bhiPcvf:l:o:p:N:n:M:m:S:s:", long_options, NULL)) != -1) {
 		switch (opt) {
+		case 1000: // --bw
+			menu->border_width = atoi(optarg);
+			break;
 		case 'b':
 			menu->bottom = true;
 			break;
@@ -164,12 +172,12 @@ void menu_getopts(struct menu *menu, int argc, char *argv[]) {
 void menu_calc_height(struct menu *menu) {
 	int height = get_font_height(menu->font);
 	menu->line_height = height + 2;
-	menu->height = menu->line_height;
+	menu->height = menu->line_height + (2 * menu->border_width);
 	if (menu->lines > 0) {
 		if (menu->item_count < (size_t)menu->lines) {
 			menu->lines = menu->item_count;
 		}
-		menu->height += menu->height * menu->lines;
+		menu->height += menu->line_height * menu->lines;
 	}
 	menu->padding = height / 2;
 }
@@ -257,7 +265,7 @@ static void page_items(struct menu *menu) {
 	} else {
 		// Calculate available space
 		int max_width = menu->width - menu->inputw - menu->promptw
-			- menu->left_arrow - menu->right_arrow;
+			- menu->left_arrow - menu->right_arrow - (2 * menu->border_width);
 
 		struct page *pages_end = NULL;
 		struct item *item = menu->matches;
