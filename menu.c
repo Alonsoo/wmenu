@@ -519,6 +519,7 @@ void menu_keypress(struct menu *menu, enum wl_keyboard_key_state key_state,
 			menu_invalidate(menu);
 			return;
 		case XKB_KEY_w:
+		case XKB_KEY_BackSpace:
 			// Delete word
 			while (menu->cursor > 0 && menu->input[nextrune(menu, -1)] == ' ') {
 				insert(menu, NULL, nextrune(menu, -1) - menu->cursor);
