@@ -1,5 +1,7 @@
 # wmenu
 
+My personal fork of [wmenu](https://codeberg.org/adnano/wmenu)
+
 wmenu is an efficient dynamic menu for Sway and wlroots based Wayland
 compositors. It provides a Wayland-native dmenu replacement which maintains the
 look and feel of dmenu.
