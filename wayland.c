@@ -453,8 +453,9 @@ int menu_run(struct menu *menu) {
 	assert(layer_surface != NULL);
 	context->layer_surface = layer_surface;
 
-<<<<<<< HEAD
-	uint32_t anchor;
+	uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
+		ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
+	int margin_top, margin_bottom = 0;
 	int wd = 0;
 	calc_widths(menu);
 
@@ -462,19 +463,7 @@ int menu_run(struct menu *menu) {
 		anchor = 0;
 		int min_width = 500;
 		wd = MIN(MAX(menu->inputw + menu->promptw, min_width) + 15 + (2 * menu->border_width), screen_info.width);
-	} else {
-		anchor = (menu->bottom ? ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM : ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) |
-			ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
-			ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
-	}
-
-	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
-	zwlr_layer_surface_v1_set_size(layer_surface, wd, menu->height);
-=======
-	int margin_top, margin_bottom = 0;
-	uint32_t anchor = ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
-		ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT;
-	if (menu->bottom) {
+	} else if (menu->bottom) {
 		anchor |= ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM;
 		margin_bottom = menu->margin;
 	} else {
@@ -482,10 +471,11 @@ int menu_run(struct menu *menu) {
 		margin_top = menu->margin;
 	}
 
+
 	zwlr_layer_surface_v1_set_anchor(layer_surface, anchor);
 	zwlr_layer_surface_v1_set_margin(layer_surface, margin_top, 0, margin_bottom, 0);
-	zwlr_layer_surface_v1_set_size(layer_surface, 0, menu->height);
->>>>>>> Patch that adds a gap between wmenu and screen edge
+	zwlr_layer_surface_v1_set_size(layer_surface, wd, menu->height);
+	//aqui
 	zwlr_layer_surface_v1_set_exclusive_zone(layer_surface, -1);
 	zwlr_layer_surface_v1_set_keyboard_interactivity(layer_surface, true);
 	zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, context);
